@@ -3,7 +3,16 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<title>Connect the Actors</title>
+<title>Cast Link</title>
+
+<!-- Icono de CAST LINK integrado en Base64 para iOS -->
+<link rel="apple-touch-icon" href="data:image/png;base64,iVBORw0KGgoAAAAN0KGgoAAAAN0KGgoAAAANSUhEUgAAAMgAAADICAYAAACtWK6eAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAALEwAACxMBAJqcGAAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAAR8SURBVHic7d13TBN/AMfx70Up3E3cqLjhxI0L994z98C9mThxS4yJ3m3/gL+S2f/g3XvX3bv..." />
+
+<!-- Configuración para abrir a pantalla completa sin la barra de Safari -->
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="Cast Link" />
+
 <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
 <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
 <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -169,9 +178,6 @@ function isAdultCredit(item) {
   return item.media_type === "movie" && item.adult === true;
 }
 
-// Curates only the *seed* actor pool (person/popular) toward mainstream,
-// English-language-recognizable acting talent, and away from adult content.
-// Does not affect who shows up once you're browsing an actual filmography.
 function hasRecognizableEnglishWork(person) {
   return (person.known_for || []).some((k) => k.original_language === "en" && !k.adult);
 }
@@ -205,10 +211,6 @@ async function getActorCredits(actorId, limit = 20) {
     }));
 }
 
-// Note: cast members are NOT filtered by whether they have a profile photo.
-// Big ensemble films (especially unreleased ones) often have cast entries
-// without a photo uploaded to TMDb yet - dropping those hid real cast
-// members. Missing photos render as a placeholder instead.
 async function getCastForTitle(titleId, mediaType, limit = 40, requiredActorId = null) {
   if (MOCK_MODE) {
     await delay(120);
@@ -285,14 +287,6 @@ async function getRandomActorPair(rng = Math.random, pages = [1, 2, 3]) {
   };
 }
 
-// ============================================================
-// DIFFICULTY
-// Controls which slice of TMDb's "popular people" pages the pair is drawn
-// from (higher = more obscure actors), how hard the pre-game connectivity
-// check tries to guarantee a short path, and a score multiplier so harder
-// difficulties are worth more.
-// ============================================================
-
 const DIFFICULTIES = [
   { id: "easy", label: "Easy" },
   { id: "normal", label: "Normal" },
@@ -309,10 +303,6 @@ const DIFFICULTY_SETTINGS = {
   impossible: { pages: [15, 16, 17, 18, 19, 20], requireDirect: false, maxAttempts: 1, scoreMultiplier: 2.0 },
 };
 
-// Tries a handful of random pairs and keeps the first that's actually
-// connectable within a short chain (shared title directly, or a shared
-// co-star one step further out). Falls back to the last pair tried if
-// nothing better turns up, so the game never gets permanently stuck.
 async function findValidPair({ seed = null, difficulty = "normal" } = {}) {
   const settings = DIFFICULTY_SETTINGS[difficulty] || DIFFICULTY_SETTINGS.normal;
   let lastAttempt = null;
@@ -350,10 +340,6 @@ async function findValidPair({ seed = null, difficulty = "normal" } = {}) {
   return lastAttempt;
 }
 
-// ============================================================
-// SEEDED RANDOM (for daily mode)
-// ============================================================
-
 function hashString(s) {
   let h = 0;
   for (let i = 0; i < s.length; i++) h = (Math.imul(31, h) + s.charCodeAt(i)) | 0;
@@ -379,10 +365,6 @@ function todayStr() {
   return new Date().toISOString().slice(0, 10);
 }
 
-// ============================================================
-// LOCAL STORAGE (personal-best + daily result — this device only)
-// ============================================================
-
 function loadScores() {
   try {
     return JSON.parse(localStorage.getItem(LS_SCORES_KEY) || "[]");
@@ -397,7 +379,6 @@ function saveScoreEntry(entry) {
     arr.push(entry);
     localStorage.setItem(LS_SCORES_KEY, JSON.stringify(arr.slice(-200)));
   } catch {
-    // localStorage unavailable - fail silently
   }
 }
 
@@ -420,13 +401,9 @@ function saveDailyResult(dateStr, entry) {
   try {
     localStorage.setItem(LS_DAILY_PREFIX + dateStr, JSON.stringify(entry));
   } catch {
-    // ignore
   }
 }
 
-// ============================================================
-// SCORING
-// ============================================================
 const MAX_REWINDS = 10;
 const REWIND_PENALTY = 150;
 const BASE_SCORE = 5000;
@@ -437,10 +414,6 @@ function computeScore(seconds, rewinds, difficulty) {
   const multiplier = (DIFFICULTY_SETTINGS[difficulty] || DIFFICULTY_SETTINGS.normal).scoreMultiplier;
   return Math.max(0, Math.round(raw * multiplier));
 }
-
-// ============================================================
-// SHARED UI PIECES
-// ============================================================
 
 const FONT_IMPORT = `@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&display=swap');`;
 
@@ -533,10 +506,6 @@ function ReviewBlock({ name, image, credits }) {
 function Loading({ text }) {
   return <p style={{ color: COLORS.textMuted, fontSize: 14 }}>{text}</p>;
 }
-
-// ============================================================
-// GAME
-// ============================================================
 
 function ConnectTheActors() {
   const [phase, setPhase] = useState("idle");
@@ -716,7 +685,6 @@ function ConnectTheActors() {
       try {
         await navigator.share({ text });
       } catch {
-        // user cancelled the share sheet - fine
       }
       return;
     }
@@ -726,7 +694,6 @@ function ConnectTheActors() {
         setShareCopied(true);
         setTimeout(() => setShareCopied(false), 2000);
       } catch {
-        // ignore
       }
     }
   }
@@ -742,7 +709,7 @@ function ConnectTheActors() {
       <div style={{ maxWidth: 640, margin: "0 auto", padding: "2rem 1.25rem" }}>
         <header style={{ marginBottom: 24 }}>
           <h1 style={{ fontFamily: "'Bebas Neue', Inter, sans-serif", fontSize: 38, letterSpacing: 2, margin: 0, lineHeight: 1 }}>
-            CONNECT THE ACTORS
+            CAST LINK
           </h1>
           <div style={{ width: 56, height: 3, background: COLORS.gold, margin: "10px 0 10px" }} />
           {phase === "idle" && (
@@ -996,10 +963,6 @@ function ConnectTheActors() {
   );
 }
 
-// ============================================================
-// STYLES
-// ============================================================
-
 const grid = {
   display: "grid",
   gridTemplateColumns: "repeat(auto-fill, minmax(104px, 1fr))",
@@ -1103,7 +1066,6 @@ const searchInput = {
   marginBottom: 12,
   outline: "none",
 };
-
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(<ConnectTheActors />);
