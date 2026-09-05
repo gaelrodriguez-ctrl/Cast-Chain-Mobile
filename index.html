@@ -2,127 +2,30 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 <title>Cast Link</title>
-
-<!-- Icono de CAST LINK integrado en Base64 para iOS -->
-<link rel="apple-touch-icon" href="data:image/png;base64,iVBORw0KGgoAAAAN0KGgoAAAAN0KGgoAAAANSUhEUgAAAMgAAADICAYAAACtWK6eAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAALEwAACxMBAJqcGAAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAAR8SURBVHic7d13TBN/AMfx70Up3E3cqLjhxI0L994z98C9mThxS4yJ3m3/gL+S2f/g3XvX3bv..." />
-
-<!-- Configuración para abrir a pantalla completa sin la barra de Safari -->
-<meta name="apple-mobile-web-app-capable" content="yes" />
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-<meta name="apple-mobile-web-app-title" content="Cast Link" />
-
 <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
 <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
 <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-<style>html,body{margin:0;padding:0;background:#111017;}</style>
-
-<style id="mobile-overrides">
-  * { box-sizing: border-box; }
-  html, body, #root {
-    width: 100%;
-    min-height: 100%;
+<style>
+  html, body {
     margin: 0;
     padding: 0;
-    overflow-x: hidden;
-    -webkit-text-size-adjust: 100%;
-  }
-  body {
-    min-height: 100dvh;
     background: #111017;
-    overscroll-behavior-y: contain;
+    width: 100%;
+    height: 100%;
+    overflow-x: hidden;
   }
-  button, input {
-    -webkit-tap-highlight-color: transparent;
-    touch-action: manipulation;
-  }
-  button { min-height: 44px; }
-  input {
-    min-height: 46px;
-    font-size: 16px !important;
-  }
-
-  @media (max-width: 700px) {
-    #root > div {
-      min-height: 100dvh !important;
-    }
-
-    #root > div > div {
-      width: 100% !important;
-      max-width: none !important;
-      padding:
-        max(18px, env(safe-area-inset-top))
-        max(14px, env(safe-area-inset-right))
-        max(24px, env(safe-area-inset-bottom))
-        max(14px, env(safe-area-inset-left)) !important;
-    }
-
-    h1 {
-      font-size: clamp(32px, 10vw, 42px) !important;
-      letter-spacing: 1.5px !important;
-    }
-
-    /* Main cards: 3 columns on most phones, 2 on very narrow screens. */
-    #root > div > div > div {
-      min-width: 0;
-    }
-
-    /* Make the filmography/cast grid fit a phone cleanly. */
-    [style*="gridTemplateColumns"] {
-      grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
-      gap: 10px !important;
-    }
-
-    /* Keep the game header/stat bar readable without horizontal overflow. */
-    [style*="justifyContent: \"space-between\""] {
-      gap: 10px;
-    }
-
-    /* Path chips can wrap naturally. */
-    [style*="flexWrap: \"wrap\""] {
-      max-width: 100%;
-    }
-
-    /* Larger touch targets for cards. */
-    button {
-      min-width: 0;
-    }
-
-    /* Prevent long actor/title names from blowing up the layout. */
-    img, div, p, span, button {
-      max-width: 100%;
-    }
-
-    /* On mobile, the target/time/rewinds row becomes a compact grid. */
-    [style*="background: COLORS.panel"][style*="padding: \"12px 16px\""] {
-      display: grid !important;
-      grid-template-columns: minmax(0, 1fr) auto auto !important;
-      gap: 10px !important;
-      padding: 10px !important;
-    }
-  }
-
-  @media (max-width: 390px) {
-    [style*="gridTemplateColumns"] {
-      grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-      gap: 10px !important;
-    }
-
-    h1 {
-      font-size: 31px !important;
-    }
-  }
-
-  @media (min-width: 701px) {
-    /* This file is mobile-first but remains usable if opened on a larger screen. */
-    #root > div > div {
-      max-width: 640px;
-      margin: 0 auto;
-    }
+  #root {
+    width: 100%;
+    max-width: 375px;
+    margin: 0 auto;
+    min-height: 100vh;
+    background: #111017;
+    box-shadow: 0 0 20px rgba(0,0,0,0.8);
+    position: relative;
   }
 </style>
-
 </head>
 <body>
 <div id="root"></div>
@@ -140,6 +43,7 @@ const TMDB_IMG = "https://image.tmdb.org/t/p/w185";
 
 const LS_SCORES_KEY = "cta_scores";
 const LS_DAILY_PREFIX = "cta_daily_";
+const LS_SOUND_KEY = "cta_sound_on";
 
 const MOCK_ACTORS = {
   a1: { name: "Tom Holland", credits: ["m1", "m2"] },
@@ -287,6 +191,10 @@ async function getRandomActorPair(rng = Math.random, pages = [1, 2, 3]) {
   };
 }
 
+// ============================================================
+// DIFFICULTY
+// ============================================================
+
 const DIFFICULTIES = [
   { id: "easy", label: "Easy" },
   { id: "normal", label: "Normal" },
@@ -296,11 +204,11 @@ const DIFFICULTIES = [
 ];
 
 const DIFFICULTY_SETTINGS = {
-  easy: { pages: [1], requireDirect: true, maxAttempts: 6, scoreMultiplier: 0.8 },
-  normal: { pages: [1, 2, 3], requireDirect: false, maxAttempts: 4, scoreMultiplier: 1.0 },
-  medium: { pages: [3, 4, 5, 6], requireDirect: false, maxAttempts: 5, scoreMultiplier: 1.2 },
-  hard: { pages: [7, 8, 9, 10], requireDirect: false, maxAttempts: 3, scoreMultiplier: 1.5 },
-  impossible: { pages: [15, 16, 17, 18, 19, 20], requireDirect: false, maxAttempts: 1, scoreMultiplier: 2.0 },
+  easy: { pages: [1, 2], requireDirect: true, maxAttempts: 6, scoreMultiplier: 0.8 },
+  normal: { pages: [1, 2, 3, 4, 5], requireDirect: false, maxAttempts: 4, scoreMultiplier: 1.0 },
+  medium: { pages: [5, 6, 7, 8, 9, 10], requireDirect: false, maxAttempts: 5, scoreMultiplier: 1.2 },
+  hard: { pages: [11, 12, 13, 14, 15, 16], requireDirect: false, maxAttempts: 3, scoreMultiplier: 1.5 },
+  impossible: { pages: [20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30], requireDirect: false, maxAttempts: 1, scoreMultiplier: 2.0 },
 };
 
 async function findValidPair({ seed = null, difficulty = "normal" } = {}) {
@@ -340,6 +248,10 @@ async function findValidPair({ seed = null, difficulty = "normal" } = {}) {
   return lastAttempt;
 }
 
+// ============================================================
+// SEEDED RANDOM
+// ============================================================
+
 function hashString(s) {
   let h = 0;
   for (let i = 0; i < s.length; i++) h = (Math.imul(31, h) + s.charCodeAt(i)) | 0;
@@ -365,6 +277,10 @@ function todayStr() {
   return new Date().toISOString().slice(0, 10);
 }
 
+// ============================================================
+// LOCAL STORAGE
+// ============================================================
+
 function loadScores() {
   try {
     return JSON.parse(localStorage.getItem(LS_SCORES_KEY) || "[]");
@@ -372,22 +288,18 @@ function loadScores() {
     return [];
   }
 }
-
 function saveScoreEntry(entry) {
   try {
     const arr = loadScores();
     arr.push(entry);
     localStorage.setItem(LS_SCORES_KEY, JSON.stringify(arr.slice(-200)));
-  } catch {
-  }
+  } catch {}
 }
-
 function getPersonalBest() {
   const arr = loadScores();
   if (!arr.length) return null;
   return arr.reduce((m, e) => (e.score > m.score ? e : m), arr[0]);
 }
-
 function loadDailyResult(dateStr) {
   try {
     const raw = localStorage.getItem(LS_DAILY_PREFIX + dateStr);
@@ -396,14 +308,68 @@ function loadDailyResult(dateStr) {
     return null;
   }
 }
-
 function saveDailyResult(dateStr, entry) {
   try {
     localStorage.setItem(LS_DAILY_PREFIX + dateStr, JSON.stringify(entry));
+  } catch {}
+}
+function loadSoundPref() {
+  try {
+    const v = localStorage.getItem(LS_SOUND_KEY);
+    return v === null ? true : v === "1";
   } catch {
+    return true;
   }
 }
+function saveSoundPref(on) {
+  try {
+    localStorage.setItem(LS_SOUND_KEY, on ? "1" : "0");
+  } catch {}
+}
 
+// ============================================================
+// SOUND
+// ============================================================
+
+let audioCtx = null;
+function getAudioCtx() {
+  if (!audioCtx) {
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return null;
+    audioCtx = new AC();
+  }
+  if (audioCtx.state === "suspended") audioCtx.resume();
+  return audioCtx;
+}
+function beep({ freq = 440, duration = 0.12, type = "sine", gain = 0.15, when = 0 }) {
+  const ctx = getAudioCtx();
+  if (!ctx) return;
+  try {
+    const osc = ctx.createOscillator();
+    const g = ctx.createGain();
+    osc.type = type;
+    osc.frequency.value = freq;
+    osc.connect(g);
+    g.connect(ctx.destination);
+    const startTime = ctx.currentTime + when;
+    g.gain.setValueAtTime(gain, startTime);
+    g.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
+    osc.start(startTime);
+    osc.stop(startTime + duration + 0.02);
+  } catch {}
+}
+const SFX = {
+  tick: () => beep({ freq: 520, duration: 0.09, type: "square", gain: 0.12 }),
+  go: () => beep({ freq: 780, duration: 0.22, type: "square", gain: 0.15 }),
+  click: () => beep({ freq: 340, duration: 0.06, type: "sine", gain: 0.1 }),
+  rewind: () => beep({ freq: 220, duration: 0.1, type: "sawtooth", gain: 0.1 }),
+  win: () => [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => beep({ freq: f, duration: 0.18, type: "triangle", gain: 0.13, when: i * 0.09 })),
+  lose: () => [300, 220, 160].forEach((f, i) => beep({ freq: f, duration: 0.22, type: "sawtooth", gain: 0.12, when: i * 0.12 })),
+};
+
+// ============================================================
+// SCORING
+// ============================================================
 const MAX_REWINDS = 10;
 const REWIND_PENALTY = 150;
 const BASE_SCORE = 5000;
@@ -415,7 +381,82 @@ function computeScore(seconds, rewinds, difficulty) {
   return Math.max(0, Math.round(raw * multiplier));
 }
 
-const FONT_IMPORT = `@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&display=swap');`;
+// ============================================================
+// STYLE
+// ============================================================
+
+const GLOBAL_CSS = `
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&display=swap');
+
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+.cta-btn { transition: transform .15s ease, filter .15s ease, box-shadow .15s ease; touch-action: manipulation; }
+.cta-btn:active { transform: scale(0.97); filter: brightness(0.9); }
+
+.cta-card { transition: transform .15s ease; touch-action: manipulation; }
+.cta-card:active { transform: scale(0.95); }
+
+.cta-chip-enter { animation: ctaChipIn .3s cubic-bezier(.2,.8,.3,1); }
+@keyframes ctaChipIn { from { opacity: 0; transform: translateX(-10px) scale(0.9); } to { opacity: 1; transform: none; } }
+
+.cta-score-pop { display: inline-block; animation: ctaScorePop .6s cubic-bezier(.34,1.56,.64,1); }
+@keyframes ctaScorePop { 0% { transform: scale(.3); opacity: 0; } 70% { transform: scale(1.1); } 100% { transform: scale(1); opacity: 1; } }
+
+.cta-count-pop { display: inline-block; animation: ctaCountPop .55s cubic-bezier(.34,1.56,.64,1); }
+@keyframes ctaCountPop { 0% { transform: scale(1.7); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+
+.cta-fade-in { animation: ctaFadeIn .35s ease; }
+@keyframes ctaFadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+.cta-title-glow { text-shadow: 0 0 16px rgba(232,172,61,0.4); }
+
+.cta-ambient::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    radial-gradient(ellipse 60% 40% at 12% -5%, rgba(232,172,61,0.13), transparent 55%),
+    radial-gradient(ellipse 60% 40% at 100% 105%, rgba(79,195,176,0.10), transparent 55%);
+}
+
+.cta-content { position: relative; z-index: 1; }
+
+.cta-confetti { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+.cta-confetti span {
+  position: absolute;
+  top: -10%;
+  width: 6px;
+  height: 14px;
+  opacity: 0.9;
+  animation: ctaConfettiFall 1.4s ease-in forwards;
+}
+@keyframes ctaConfettiFall {
+  0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(220px) rotate(360deg); opacity: 0; }
+}
+
+.cta-ring-track { fill: none; stroke: #332F42; stroke-width: 5; }
+.cta-ring-progress { fill: none; stroke: #E8AC3D; stroke-width: 5; stroke-linecap: round; transition: stroke-dashoffset .68s linear; }
+
+.cta-vs { position: relative; text-align: center; margin: 8px 0; }
+.cta-vs::before, .cta-vs::after { content: ""; position: absolute; top: 50%; width: 40%; height: 1px; background: #332F42; }
+.cta-vs::before { left: 0; }
+.cta-vs::after { right: 0; }
+
+.cta-horizontal-scroll {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+.cta-horizontal-scroll::-webkit-scrollbar { display: none; }
+
+@keyframes cta-spin { to { transform: rotate(360deg); } }
+`;
 
 const COLORS = {
   bg: "#111017",
@@ -430,11 +471,57 @@ const COLORS = {
   red: "#E2604F",
 };
 
+function ClapperIcon({ size = 26 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 48 48" fill="none">
+      <rect x="6" y="18" width="36" height="24" rx="3" fill={COLORS.panelAlt} stroke={COLORS.gold} strokeWidth="2" />
+      <path d="M6 18 L12 8 L18 8 L14 18 Z" fill={COLORS.gold} />
+      <path d="M18 18 L24 8 L30 8 L26 18 Z" fill={COLORS.panelAlt} stroke={COLORS.gold} strokeWidth="1.5" />
+      <path d="M30 18 L36 8 L42 8 L38 18 Z" fill={COLORS.gold} />
+      <line x1="6" y1="18" x2="42" y2="18" stroke={COLORS.gold} strokeWidth="2" />
+    </svg>
+  );
+}
+
+function ConfettiBurst() {
+  const pieces = Array.from({ length: 24 }).map((_, i) => {
+    const left = Math.random() * 100;
+    const delay = Math.random() * 0.3;
+    const color = [COLORS.gold, COLORS.teal, COLORS.text][i % 3];
+    return (
+      <span key={i} style={{ left: `${left}%`, background: color, animationDelay: `${delay}s`, transform: `rotate(${Math.random() * 360}deg)` }} />
+    );
+  });
+  return <div className="cta-confetti">{pieces}</div>;
+}
+
+function CountdownRing({ value, max = 3 }) {
+  const size = 110;
+  const stroke = 5;
+  const r = (size - stroke) / 2;
+  const circumference = 2 * Math.PI * r;
+  const frac = value === 0 ? 1 : (max - value + 1) / (max + 1);
+  const offset = circumference * (1 - frac);
+  return (
+    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} style={{ transform: "rotate(-90deg)" }}>
+      <circle className="cta-ring-track" cx={size / 2} cy={size / 2} r={r} />
+      <circle
+        className="cta-ring-progress"
+        cx={size / 2}
+        cy={size / 2}
+        r={r}
+        strokeDasharray={circumference}
+        strokeDashoffset={offset}
+      />
+    </svg>
+  );
+}
+
 function Sprocket() {
   return (
-    <div style={{ display: "flex", justifyContent: "space-evenly", padding: "0 2px", marginBottom: 3 }}>
-      {Array.from({ length: 6 }).map((_, i) => (
-        <div key={i} style={{ width: 4, height: 4, borderRadius: "50%", background: COLORS.line }} />
+    <div style={{ display: "flex", justifyContent: "space-evenly", padding: "0 2px", marginBottom: 2 }}>
+      {Array.from({ length: 5 }).map((_, i) => (
+        <div key={i} style={{ width: 3, height: 3, borderRadius: "50%", background: COLORS.line }} />
       ))}
     </div>
   );
@@ -444,18 +531,19 @@ function PosterCard({ image, mediaType, title, subtitle, onClick }) {
   const Tag = onClick ? "button" : "div";
   const accent = mediaType === "tv" ? COLORS.teal : COLORS.gold;
   return (
-    <Tag onClick={onClick} style={onClick ? cardBtnReset : { textAlign: "left" }}>
+    <Tag onClick={onClick} className={onClick ? "cta-card" : undefined} style={onClick ? cardBtnReset : { textAlign: "left" }}>
       <Sprocket />
-      <div style={{ position: "relative", borderRadius: 6, overflow: "hidden", border: `1px solid ${COLORS.line}` }}>
+      <div className="cta-card-frame" style={{ position: "relative", borderRadius: 6, overflow: "hidden", border: `1px solid ${COLORS.line}` }}>
         {image ? (
           <img src={image} alt="" style={{ width: "100%", aspectRatio: "2 / 3", objectFit: "cover", display: "block" }} />
         ) : (
           <div style={{ width: "100%", aspectRatio: "2 / 3", background: COLORS.panelAlt }} />
         )}
         <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 3, background: accent }} />
+        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(180deg, transparent 60%, rgba(0,0,0,0.55) 100%)" }} />
       </div>
-      <div style={{ fontSize: 12.5, fontWeight: 600, marginTop: 6, lineHeight: 1.25, color: COLORS.text }}>{title}</div>
-      {subtitle && <div style={{ fontSize: 11, color: COLORS.textMuted, marginTop: 1 }}>{subtitle}</div>}
+      <div style={{ fontSize: 11, fontWeight: 600, marginTop: 4, lineHeight: 1.2, color: COLORS.text, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{title}</div>
+      {subtitle && <div style={{ fontSize: 9.5, color: COLORS.textMuted, marginTop: 1 }}>{subtitle}</div>}
     </Tag>
   );
 }
@@ -463,18 +551,20 @@ function PosterCard({ image, mediaType, title, subtitle, onClick }) {
 function PersonCard({ image, name, subtitle, onClick }) {
   const Tag = onClick ? "button" : "div";
   return (
-    <Tag onClick={onClick} style={onClick ? { ...cardBtnReset, textAlign: "center" } : { textAlign: "center" }}>
-      {image ? (
-        <img
-          src={image}
-          alt=""
-          style={{ width: "100%", aspectRatio: "1 / 1", objectFit: "cover", borderRadius: "50%", border: `2px solid ${COLORS.line}`, display: "block" }}
-        />
-      ) : (
-        <div style={{ width: "100%", aspectRatio: "1 / 1", borderRadius: "50%", background: COLORS.panelAlt, border: `2px solid ${COLORS.line}` }} />
-      )}
-      <div style={{ fontSize: 12.5, fontWeight: 600, marginTop: 6, lineHeight: 1.25, color: COLORS.text }}>{name}</div>
-      {subtitle && <div style={{ fontSize: 11, color: COLORS.textMuted, marginTop: 1 }}>{subtitle}</div>}
+    <Tag onClick={onClick} className={onClick ? "cta-card" : undefined} style={onClick ? { ...cardBtnReset, textAlign: "center" } : { textAlign: "center" }}>
+      <div className="cta-card-frame" style={{ borderRadius: "50%", margin: "0 auto", width: "100%" }}>
+        {image ? (
+          <img
+            src={image}
+            alt=""
+            style={{ width: "100%", aspectRatio: "1 / 1", objectFit: "cover", borderRadius: "50%", border: `2px solid ${COLORS.line}`, display: "block" }}
+          />
+        ) : (
+          <div style={{ width: "100%", aspectRatio: "1 / 1", borderRadius: "50%", background: COLORS.panelAlt, border: `2px solid ${COLORS.line}` }} />
+        )}
+      </div>
+      <div style={{ fontSize: 11, fontWeight: 600, marginTop: 4, lineHeight: 1.2, color: COLORS.text, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{name}</div>
+      {subtitle && <div style={{ fontSize: 9.5, color: COLORS.textMuted, marginTop: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{subtitle}</div>}
     </Tag>
   );
 }
@@ -482,20 +572,22 @@ function PersonCard({ image, name, subtitle, onClick }) {
 function ReviewBlock({ name, image, credits }) {
   return (
     <div>
-      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
         {image ? (
-          <img src={image} alt="" style={{ width: 40, height: 40, borderRadius: "50%", objectFit: "cover", border: `2px solid ${COLORS.gold}` }} />
+          <img src={image} alt="" style={{ width: 34, height: 34, borderRadius: "50%", objectFit: "cover", border: `2px solid ${COLORS.gold}` }} />
         ) : (
-          <div style={{ width: 40, height: 40, borderRadius: "50%", background: COLORS.panelAlt }} />
+          <div style={{ width: 34, height: 34, borderRadius: "50%", background: COLORS.panelAlt }} />
         )}
-        <p style={{ fontSize: 15, fontWeight: 700, margin: 0, color: COLORS.text }}>{name}</p>
+        <p style={{ fontSize: 14, fontWeight: 700, margin: 0, color: COLORS.text }}>{name}</p>
       </div>
       {credits.length === 0 ? (
-        <p style={{ color: COLORS.textMuted, fontSize: 13 }}>No credits found.</p>
+        <p style={{ color: COLORS.textMuted, fontSize: 12 }}>No credits found.</p>
       ) : (
-        <div style={grid}>
+        <div className="cta-horizontal-scroll">
           {credits.map((c) => (
-            <PosterCard key={`${c.mediaType}-${c.id}`} image={c.image} mediaType={c.mediaType} title={c.title} subtitle={c.year} />
+            <div key={`${c.mediaType}-${c.id}`} style={{ width: 80, flexShrink: 0 }}>
+              <PosterCard image={c.image} mediaType={c.mediaType} title={c.title} subtitle={c.year} />
+            </div>
           ))}
         </div>
       )}
@@ -504,8 +596,28 @@ function ReviewBlock({ name, image, credits }) {
 }
 
 function Loading({ text }) {
-  return <p style={{ color: COLORS.textMuted, fontSize: 14 }}>{text}</p>;
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "12px 0", justifyContent: "center" }}>
+      <div style={spinner} />
+      <p style={{ color: COLORS.textMuted, fontSize: 13, margin: 0 }}>{text}</p>
+    </div>
+  );
 }
+
+function Footer() {
+  return (
+    <footer style={{ marginTop: 28, paddingTop: 14, borderTop: `1px solid ${COLORS.line}`, textAlign: "center" }}>
+      <p style={{ margin: 0, fontSize: 11, color: COLORS.textMuted, letterSpacing: 0.5 }}>GR Creations 2026</p>
+      <p style={{ margin: "3px 0 0", fontSize: 9.5, color: COLORS.goldDim, lineHeight: 1.3 }}>
+        TMDB — all credits given. This product uses the TMDB API but is not endorsed or certified by TMDB.
+      </p>
+    </footer>
+  );
+}
+
+// ============================================================
+// GAME
+// ============================================================
 
 function ConnectTheActors() {
   const [phase, setPhase] = useState("idle");
@@ -526,6 +638,7 @@ function ConnectTheActors() {
   const [personalBest, setPersonalBest] = useState(null);
   const [dailyResult, setDailyResult] = useState(null);
   const [shareCopied, setShareCopied] = useState(false);
+  const [soundOn, setSoundOn] = useState(true);
   const timerRef = useRef(null);
   const startTimeRef = useRef(null);
 
@@ -539,7 +652,20 @@ function ConnectTheActors() {
   useEffect(() => {
     setPersonalBest(getPersonalBest());
     setDailyResult(loadDailyResult(todayStr()));
+    setSoundOn(loadSoundPref());
   }, []);
+
+  function play(name) {
+    if (soundOn) SFX[name]();
+  }
+
+  function toggleSound() {
+    setSoundOn((prev) => {
+      const next = !prev;
+      saveSoundPref(next);
+      return next;
+    });
+  }
 
   async function startGame(mode) {
     setSelectedMode(mode);
@@ -583,6 +709,7 @@ function ConnectTheActors() {
   useEffect(() => {
     if (phase !== "countdown") return;
     if (countdown === 0) {
+      play("go");
       setPhase("playing");
       startTimeRef.current = Date.now();
       timerRef.current = setInterval(() => {
@@ -591,8 +718,10 @@ function ConnectTheActors() {
       loadTitleOptions(pair.start.id);
       return;
     }
+    play("tick");
     const t = setTimeout(() => setCountdown((c) => c - 1), 700);
     return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase, countdown]);
 
   async function loadTitleOptions(actorId) {
@@ -626,6 +755,7 @@ function ConnectTheActors() {
       setElapsed(secs);
       setFinalScore(score);
       setPhase("won");
+      play("win");
 
       const entry = {
         ts: Date.now(),
@@ -645,6 +775,7 @@ function ConnectTheActors() {
       return;
     }
 
+    play("click");
     if (opt.kind === "title") {
       loadCastOptions(opt.id, opt.mediaType, newPath[newPath.length - 2]?.id);
     } else {
@@ -655,12 +786,14 @@ function ConnectTheActors() {
   function rewind() {
     if (phase !== "playing") return;
     if (path.length <= 1) return;
+    play("rewind");
     const nextRewinds = rewindsUsed + 1;
     setRewindsUsed(nextRewinds);
 
     if (nextRewinds > MAX_REWINDS) {
       stopTimer();
       setPhase("lost");
+      play("lose");
       return;
     }
 
@@ -675,17 +808,17 @@ function ConnectTheActors() {
     if (phase !== "playing") return;
     stopTimer();
     setPhase("gaveup");
+    play("lose");
   }
 
   async function shareResult() {
     const modeLabel = selectedMode === "daily" ? `Daily - ${todayStr()}` : "Random";
     const diffLabel = DIFFICULTIES.find((d) => d.id === selectedDifficulty)?.label || "Normal";
-    const text = `Cast-Chain - ${modeLabel} (${diffLabel})\n${pair.start.name} to ${pair.target.name}\n${elapsed.toFixed(1)}s - ${rewindsUsed} rewind${rewindsUsed !== 1 ? "s" : ""} - ${path.length - 1} hops\n${finalScore} pts`;
+    const text = `Cast Link - ${modeLabel} (${diffLabel})\n${pair.start.name} to ${pair.target.name}\n${elapsed.toFixed(1)}s - ${rewindsUsed} rewind${rewindsUsed !== 1 ? "s" : ""} - ${path.length - 1} hops\n${finalScore} pts`;
     if (navigator.share) {
       try {
         await navigator.share({ text });
-      } catch {
-      }
+      } catch {}
       return;
     }
     if (navigator.clipboard) {
@@ -693,8 +826,7 @@ function ConnectTheActors() {
         await navigator.clipboard.writeText(text);
         setShareCopied(true);
         setTimeout(() => setShareCopied(false), 2000);
-      } catch {
-      }
+      } catch {}
     }
   }
 
@@ -704,29 +836,36 @@ function ConnectTheActors() {
     : options.slice(0, 18);
 
   return (
-    <div style={{ background: COLORS.bg, minHeight: "100%", color: COLORS.text, fontFamily: "Inter, system-ui, sans-serif" }}>
-      <style>{FONT_IMPORT}</style>
-      <div style={{ maxWidth: 640, margin: "0 auto", padding: "2rem 1.25rem" }}>
-        <header style={{ marginBottom: 24 }}>
-          <h1 style={{ fontFamily: "'Bebas Neue', Inter, sans-serif", fontSize: 38, letterSpacing: 2, margin: 0, lineHeight: 1 }}>
-            CAST LINK
-          </h1>
-          <div style={{ width: 56, height: 3, background: COLORS.gold, margin: "10px 0 10px" }} />
-          {phase === "idle" && (
-            <p style={{ color: COLORS.textMuted, fontSize: 13.5, margin: 0, lineHeight: 1.5 }}>
-              Connect two actors through the movies and shows they share. Faster time, fewer rewinds, higher score.
-            </p>
-          )}
+    <div className="cta-ambient" style={{ background: COLORS.bg, minHeight: "100vh", color: COLORS.text, fontFamily: "Inter, system-ui, sans-serif" }}>
+      <style>{GLOBAL_CSS}</style>
+      <div className="cta-content" style={{ width: "100%", padding: "1rem 0.85rem 1rem" }}>
+        <header style={{ marginBottom: 18, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <ClapperIcon />
+            <div>
+              <h1 className="cta-title-glow" style={{ fontFamily: "'Bebas Neue', Inter, sans-serif", fontSize: 28, letterSpacing: 1.5, margin: 0, lineHeight: 1 }}>
+                CAST LINK
+              </h1>
+            </div>
+          </div>
+          <button onClick={toggleSound} className="cta-btn" style={soundToggleBtn}>
+            Sound: {soundOn ? "On" : "Off"}
+          </button>
         </header>
 
         {phase === "idle" && (
-          <div>
-            <p style={{ fontSize: 12.5, fontWeight: 700, color: COLORS.textMuted, letterSpacing: 0.5, margin: "0 0 8px" }}>DIFFICULTY</p>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 20 }}>
+          <div className="cta-fade-in">
+            <p style={{ color: COLORS.textMuted, fontSize: 12.5, margin: "0 0 14px", lineHeight: 1.4 }}>
+              Connect two actors through the movies and shows they share. Faster time, fewer rewinds, higher score.
+            </p>
+
+            <p style={sectionLabel}>DIFFICULTY</p>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 16 }}>
               {DIFFICULTIES.map((d) => (
                 <button
                   key={d.id}
                   onClick={() => setSelectedDifficulty(d.id)}
+                  className="cta-btn"
                   style={selectedDifficulty === d.id ? diffBtnActive : diffBtn}
                 >
                   {d.label}
@@ -734,137 +873,139 @@ function ConnectTheActors() {
               ))}
             </div>
 
-            <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 18 }}>
-              <button onClick={() => startGame("random")} style={btnPrimary}>
+            <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 16 }}>
+              <button onClick={() => startGame("random")} className="cta-btn" style={btnPrimary}>
                 Random game
               </button>
-              <button onClick={() => startGame("daily")} style={btnSecondary}>
-                Daily challenge{dailyResult ? " — played today" : ""}
+              <button onClick={() => startGame("daily")} className="cta-btn" style={btnSecondary}>
+                Daily challenge{dailyResult ? " — played" : ""}
               </button>
             </div>
 
             {dailyResult && (
-              <p style={{ fontSize: 12.5, color: COLORS.textMuted, marginTop: -6, marginBottom: 14 }}>
-                Today's result: {dailyResult.score} pts · {dailyResult.seconds.toFixed(1)}s · {dailyResult.rewinds} rewinds. Playing again won't overwrite it unless you finish another run.
+              <p style={{ fontSize: 11.5, color: COLORS.textMuted, marginTop: -4, marginBottom: 12 }}>
+                Today's result: {dailyResult.score} pts · {dailyResult.seconds.toFixed(1)}s · {dailyResult.rewinds} rewinds.
               </p>
             )}
 
             {personalBest && (
-              <p style={{ fontSize: 12.5, color: COLORS.textMuted, marginBottom: 18 }}>
+              <p style={{ fontSize: 11.5, color: COLORS.textMuted, marginBottom: 16 }}>
                 Personal best: <b style={{ color: COLORS.gold }}>{personalBest.score} pts</b> ({personalBest.seconds.toFixed(1)}s, {personalBest.rewinds} rewinds)
               </p>
             )}
 
             <div style={panel}>
-              <p style={{ fontSize: 12.5, fontWeight: 700, color: COLORS.textMuted, letterSpacing: 0.5, margin: "0 0 8px" }}>HOW TO PLAY</p>
-              <ol style={{ margin: 0, paddingLeft: 18, fontSize: 13, color: COLORS.textMuted, lineHeight: 1.7 }}>
-                <li>You get two actors — study their filmographies for 15s.</li>
-                <li>Pick a movie/show one actor was in, then someone from its cast, and repeat until you reach the other actor.</li>
-                <li>Wrong turn? Rewind — but it costs points, and 10 rewinds ends the run.</li>
+              <p style={{ ...sectionLabel, marginBottom: 6 }}>HOW TO PLAY</p>
+              <ol style={{ margin: 0, paddingLeft: 16, fontSize: 12, color: COLORS.textMuted, lineHeight: 1.5 }}>
+                <li>Get two actors & study filmographies (15s).</li>
+                <li>Pick a title, then a co-star, until target actor.</li>
+                <li>Rewinds cost points. 10 rewinds = Game Over.</li>
               </ol>
             </div>
           </div>
         )}
 
-        {phase === "loading-pair" && <Loading text="Picking a connectable pair…" />}
+        {phase === "loading-pair" && (
+          <div className="cta-fade-in" style={{ padding: "2rem 0" }}>
+            <Loading text="Picking a connectable pair…" />
+          </div>
+        )}
 
         {phase === "error" && (
-          <div style={panel}>
-            <p style={{ color: COLORS.red, fontWeight: 700, marginBottom: 8 }}>Couldn't load data from TMDb</p>
-            <p style={{ color: COLORS.textMuted, fontSize: 13, fontFamily: "monospace", background: COLORS.panelAlt, padding: "8px 10px", borderRadius: 6 }}>
+          <div className="cta-fade-in" style={panel}>
+            <p style={{ color: COLORS.red, fontWeight: 700, marginBottom: 6, fontSize: 14 }}>Couldn't load TMDb data</p>
+            <p style={{ color: COLORS.textMuted, fontSize: 12, fontFamily: "monospace", background: COLORS.panelAlt, padding: "6px 8px", borderRadius: 6, wordBreak: "break-all" }}>
               {errorMsg}
             </p>
-            <button onClick={() => startGame(selectedMode)} style={{ ...btnPrimary, marginTop: 14 }}>
+            <button onClick={() => startGame(selectedMode)} className="cta-btn" style={{ ...btnPrimary, marginTop: 12, padding: "10px 18px" }}>
               Retry
             </button>
           </div>
         )}
 
         {phase === "review" && pair && (
-          <div>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 18 }}>
-              <p style={{ fontSize: 13.5, color: COLORS.textMuted, margin: 0 }}>Study their filmographies before you start</p>
-              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 26, color: COLORS.gold, letterSpacing: 1 }}>{reviewSeconds}s</span>
-                <button onClick={beginCountdown} style={btnGhost}>
+          <div className="cta-fade-in">
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+              <p style={{ fontSize: 12, color: COLORS.textMuted, margin: 0 }}>Study filmographies before starting</p>
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <span key={reviewSeconds} className="cta-count-pop" style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 22, color: COLORS.gold, letterSpacing: 1 }}>
+                  {reviewSeconds}s
+                </span>
+                <button onClick={beginCountdown} className="cta-btn" style={{ ...btnGhost, padding: "4px 10px", fontSize: 11 }}>
                   Skip
                 </button>
               </div>
             </div>
             <ReviewBlock name={pair.start.name} image={pair.start.image} credits={reviewCredits.start} />
-            <div style={{ height: 22 }} />
+            <div className="cta-vs">
+              <span style={{ position: "relative", background: COLORS.bg, padding: "0 8px", fontFamily: "'Bebas Neue', sans-serif", fontSize: 16, color: COLORS.textMuted, letterSpacing: 1.5 }}>
+                VS
+              </span>
+            </div>
             <ReviewBlock name={pair.target.name} image={pair.target.image} credits={reviewCredits.target} />
           </div>
         )}
 
         {phase === "countdown" && pair && (
-          <div style={{ textAlign: "center", padding: "3rem 0" }}>
-            <p style={{ fontSize: 15, marginBottom: 14, color: COLORS.textMuted }}>
+          <div className="cta-fade-in" style={{ textAlign: "center", padding: "2rem 0" }}>
+            <p style={{ fontSize: 13.5, marginBottom: 16, color: COLORS.textMuted }}>
               Connect <b style={{ color: COLORS.text }}>{pair.start.name}</b> to <b style={{ color: COLORS.text }}>{pair.target.name}</b>
             </p>
-            <div
-              style={{
-                width: 120,
-                height: 120,
-                borderRadius: "50%",
-                border: `3px solid ${COLORS.gold}`,
-                margin: "0 auto",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontFamily: "'Bebas Neue', sans-serif",
-                fontSize: 56,
-                color: COLORS.gold,
-              }}
-            >
-              {countdown === 0 ? "GO" : countdown}
+            <div style={{ position: "relative", width: 110, height: 110, margin: "0 auto" }}>
+              <CountdownRing value={countdown} max={3} />
+              <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <span key={countdown} className="cta-count-pop" style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 42, color: COLORS.gold }}>
+                  {countdown === 0 ? "GO" : countdown}
+                </span>
+              </div>
             </div>
           </div>
         )}
 
         {(phase === "playing" || phase === "won" || phase === "lost" || phase === "gaveup") && pair && (
-          <>
+          <div className="cta-fade-in">
             <div style={statBar}>
-              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                 {pair.target.image ? (
-                  <img src={pair.target.image} alt="" style={{ width: 38, height: 38, borderRadius: "50%", objectFit: "cover" }} />
+                  <img src={pair.target.image} alt="" style={{ width: 32, height: 32, borderRadius: "50%", objectFit: "cover" }} />
                 ) : (
-                  <div style={{ width: 38, height: 38, borderRadius: "50%", background: COLORS.panelAlt }} />
+                  <div style={{ width: 32, height: 32, borderRadius: "50%", background: COLORS.panelAlt }} />
                 )}
-                <div>
+                <div style={{ maxWidth: 100, overflow: "hidden" }}>
                   <span style={statLabel}>Target</span>
-                  <div style={{ fontWeight: 700 }}>{pair.target.name}</div>
+                  <div style={{ fontWeight: 700, fontSize: 12, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{pair.target.name}</div>
                 </div>
               </div>
-              <div>
+              <div style={{ textAlign: "center" }}>
                 <span style={statLabel}>Time</span>
-                <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 22, color: COLORS.gold, letterSpacing: 0.5 }}>{elapsed.toFixed(1)}s</div>
+                <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 18, color: COLORS.gold, letterSpacing: 0.5 }}>{elapsed.toFixed(1)}s</div>
               </div>
-              <div>
+              <div style={{ textAlign: "right" }}>
                 <span style={statLabel}>Rewinds</span>
-                <div style={{ fontWeight: 700, color: rewindsUsed >= 8 ? COLORS.red : COLORS.text }}>
+                <div style={{ fontWeight: 700, fontSize: 12, color: rewindsUsed >= 8 ? COLORS.red : COLORS.text }}>
                   {rewindsUsed}/{MAX_REWINDS}
                 </div>
               </div>
             </div>
 
-            <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 6, margin: "16px 0" }}>
+            <div style={{ display: "flex", overflowX: "auto", alignItems: "center", gap: 4, margin: "12px 0", paddingBottom: 4, scrollbarWidth: "none" }}>
               {path.map((p, i) => (
-                <span key={i} style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                  {i > 0 && <span style={{ color: COLORS.line }}>›</span>}
+                <span key={i} className={i === path.length - 1 ? "cta-chip-enter" : undefined} style={{ display: "flex", alignItems: "center", gap: 4, flexShrink: 0 }}>
+                  {i > 0 && <span style={{ color: COLORS.line, fontSize: 11 }}>›</span>}
                   <span
                     style={{
                       display: "flex",
                       alignItems: "center",
-                      gap: 6,
+                      gap: 4,
                       background: COLORS.panelAlt,
                       border: `1px solid ${COLORS.line}`,
-                      borderRadius: p.type === "actor" ? 999 : 6,
-                      padding: "4px 10px 4px 4px",
-                      fontSize: 12.5,
+                      borderRadius: p.type === "actor" ? 999 : 4,
+                      padding: "3px 8px 3px 3px",
+                      fontSize: 11,
+                      whiteSpace: "nowrap",
                     }}
                   >
-                    {p.image && <img src={p.image} alt="" style={{ width: 20, height: 20, borderRadius: p.type === "actor" ? "50%" : 3, objectFit: "cover" }} />}
+                    {p.image && <img src={p.image} alt="" style={{ width: 16, height: 16, borderRadius: p.type === "actor" ? "50%" : 2, objectFit: "cover" }} />}
                     {p.name}
                   </span>
                 </span>
@@ -873,15 +1014,15 @@ function ConnectTheActors() {
 
             {phase === "playing" && (
               <>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10, gap: 8, flexWrap: "wrap" }}>
-                  <p style={{ fontSize: 13, color: COLORS.textMuted, margin: 0 }}>
-                    {lastStep.type === "actor" ? "Pick a movie or show:" : "Pick someone from the cast:"}
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8, gap: 6 }}>
+                  <p style={{ fontSize: 12, color: COLORS.textMuted, margin: 0 }}>
+                    {lastStep.type === "actor" ? "Pick movie/show:" : "Pick cast member:"}
                   </p>
-                  <div style={{ display: "flex", gap: 8 }}>
-                    <button onClick={rewind} disabled={path.length <= 1} style={btnGhost}>
+                  <div style={{ display: "flex", gap: 6 }}>
+                    <button onClick={rewind} disabled={path.length <= 1} className="cta-btn" style={btnGhost}>
                       Rewind
                     </button>
-                    <button onClick={giveUp} style={btnGhostDanger}>
+                    <button onClick={giveUp} className="cta-btn" style={btnGhostDanger}>
                       Give up
                     </button>
                   </div>
@@ -890,14 +1031,14 @@ function ConnectTheActors() {
                 <input
                   value={optionSearch}
                   onChange={(e) => setOptionSearch(e.target.value)}
-                  placeholder={lastStep.type === "actor" ? "Search their filmography…" : "Search the cast…"}
+                  placeholder={lastStep.type === "actor" ? "Search filmography…" : "Search cast…"}
                   style={searchInput}
                 />
 
                 {loadingOptions ? (
                   <Loading text="Loading…" />
                 ) : visibleOptions.length === 0 ? (
-                  <p style={{ color: COLORS.textMuted, fontSize: 13 }}>No matches.</p>
+                  <p style={{ color: COLORS.textMuted, fontSize: 12, textAlign: "center", padding: "12px 0" }}>No matches.</p>
                 ) : (
                   <div style={grid}>
                     {visibleOptions.map((opt) =>
@@ -920,19 +1061,20 @@ function ConnectTheActors() {
             )}
 
             {phase === "won" && (
-              <div style={{ ...panel, textAlign: "center" }}>
-                <p style={{ fontSize: 18, fontWeight: 700, margin: 0 }}>Connected</p>
-                <p style={{ color: COLORS.textMuted, fontSize: 13.5, margin: "6px 0 14px" }}>
+              <div style={{ ...panel, textAlign: "center", position: "relative", overflow: "hidden" }}>
+                <ConfettiBurst />
+                <p style={{ fontSize: 16, fontWeight: 700, margin: 0 }}>Connected!</p>
+                <p style={{ color: COLORS.textMuted, fontSize: 12, margin: "4px 0 10px" }}>
                   {elapsed.toFixed(1)}s · {rewindsUsed} rewind{rewindsUsed !== 1 ? "s" : ""} · {path.length - 1} hops
                 </p>
-                <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 44, color: COLORS.gold, letterSpacing: 1, marginBottom: 18 }}>
+                <div className="cta-score-pop" style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 38, color: COLORS.gold, letterSpacing: 1, marginBottom: 14 }}>
                   {finalScore} PTS
                 </div>
-                <div style={{ display: "flex", gap: 10, justifyContent: "center", flexWrap: "wrap" }}>
-                  <button onClick={() => startGame(selectedMode)} style={btnPrimary}>
+                <div style={{ display: "flex", gap: 8, justifyContent: "center", flexWrap: "wrap" }}>
+                  <button onClick={() => startGame(selectedMode)} className="cta-btn" style={{ ...btnPrimary, padding: "10px 18px", fontSize: 13 }}>
                     Play again
                   </button>
-                  <button onClick={shareResult} style={btnSecondary}>
+                  <button onClick={shareResult} className="cta-btn" style={{ ...btnSecondary, padding: "10px 18px", fontSize: 13 }}>
                     {shareCopied ? "Copied" : "Share result"}
                   </button>
                 </div>
@@ -941,8 +1083,8 @@ function ConnectTheActors() {
 
             {phase === "lost" && (
               <div style={{ ...panel, textAlign: "center" }}>
-                <p style={{ fontSize: 17, fontWeight: 700, color: COLORS.red, margin: 0 }}>Too many rewinds — game over</p>
-                <button onClick={() => startGame(selectedMode)} style={{ ...btnPrimary, marginTop: 16 }}>
+                <p style={{ fontSize: 15, fontWeight: 700, color: COLORS.red, margin: 0 }}>Too many rewinds — game over</p>
+                <button onClick={() => startGame(selectedMode)} className="cta-btn" style={{ ...btnPrimary, marginTop: 12, padding: "10px 18px", fontSize: 13 }}>
                   Try again
                 </button>
               </div>
@@ -950,23 +1092,29 @@ function ConnectTheActors() {
 
             {phase === "gaveup" && (
               <div style={{ ...panel, textAlign: "center" }}>
-                <p style={{ fontSize: 17, fontWeight: 700, color: COLORS.textMuted, margin: 0 }}>You gave up — no score this round</p>
-                <button onClick={() => startGame(selectedMode)} style={{ ...btnPrimary, marginTop: 16 }}>
+                <p style={{ fontSize: 15, fontWeight: 700, color: COLORS.textMuted, margin: 0 }}>You gave up — no score</p>
+                <button onClick={() => startGame(selectedMode)} className="cta-btn" style={{ ...btnPrimary, marginTop: 12, padding: "10px 18px", fontSize: 13 }}>
                   Try again
                 </button>
               </div>
             )}
-          </>
+          </div>
         )}
+
+        <Footer />
       </div>
     </div>
   );
 }
 
+// ============================================================
+// STYLES
+// ============================================================
+
 const grid = {
   display: "grid",
-  gridTemplateColumns: "repeat(auto-fill, minmax(104px, 1fr))",
-  gap: 14,
+  gridTemplateColumns: "repeat(3, 1fr)",
+  gap: 8,
 };
 
 const cardBtnReset = {
@@ -980,33 +1128,37 @@ const cardBtnReset = {
 };
 
 const panel = {
-  background: COLORS.panel,
+  background: `linear-gradient(180deg, ${COLORS.panel}, ${COLORS.panelAlt})`,
   border: `1px solid ${COLORS.line}`,
   borderRadius: 10,
-  padding: "20px 18px",
+  padding: "16px 14px",
 };
 
 const statBar = {
   display: "flex",
   justifyContent: "space-between",
   alignItems: "center",
-  background: COLORS.panel,
+  background: `linear-gradient(180deg, ${COLORS.panel}, ${COLORS.panelAlt})`,
   border: `1px solid ${COLORS.line}`,
   borderRadius: 10,
-  padding: "12px 16px",
+  padding: "10px 12px",
 };
 
-const statLabel = { fontSize: 10.5, color: COLORS.textMuted, letterSpacing: 0.5 };
+const statLabel = { fontSize: 9.5, color: COLORS.textMuted, letterSpacing: 0.5, display: "block" };
+
+const sectionLabel = { fontSize: 11.5, fontWeight: 700, color: COLORS.textMuted, letterSpacing: 0.5, margin: "0 0 6px" };
 
 const btnPrimary = {
-  background: COLORS.gold,
+  background: `linear-gradient(180deg, #F0BD57, ${COLORS.gold})`,
   color: "#1B1608",
   border: "none",
   borderRadius: 999,
-  padding: "12px 22px",
-  fontSize: 14.5,
+  padding: "11px 18px",
+  fontSize: 13.5,
   fontWeight: 700,
   cursor: "pointer",
+  boxShadow: "0 4px 14px rgba(232,172,61,0.25)",
+  width: "100%",
 };
 
 const btnSecondary = {
@@ -1014,10 +1166,11 @@ const btnSecondary = {
   color: COLORS.text,
   border: `1px solid ${COLORS.line}`,
   borderRadius: 999,
-  padding: "12px 22px",
-  fontSize: 14.5,
+  padding: "11px 18px",
+  fontSize: 13.5,
   fontWeight: 600,
   cursor: "pointer",
+  width: "100%",
 };
 
 const btnGhost = {
@@ -1025,34 +1178,29 @@ const btnGhost = {
   border: `1px solid ${COLORS.line}`,
   color: COLORS.textMuted,
   borderRadius: 999,
-  padding: "6px 14px",
-  fontSize: 12.5,
+  padding: "5px 10px",
+  fontSize: 11.5,
   cursor: "pointer",
 };
 
-const btnGhostDanger = {
-  ...btnGhost,
-  color: COLORS.red,
-  borderColor: COLORS.red,
-};
+const btnGhostDanger = { ...btnGhost, color: COLORS.red, borderColor: COLORS.red };
+
+const soundToggleBtn = { ...btnGhost, flexShrink: 0, padding: "4px 8px", fontSize: 11 };
 
 const diffBtn = {
   background: COLORS.panelAlt,
   border: `1px solid ${COLORS.line}`,
   color: COLORS.textMuted,
-  borderRadius: 8,
-  padding: "8px 14px",
-  fontSize: 13,
+  borderRadius: 6,
+  padding: "6px 10px",
+  fontSize: 11.5,
   fontWeight: 600,
   cursor: "pointer",
+  flex: "1 1 auto",
+  textAlign: "center",
 };
 
-const diffBtnActive = {
-  ...diffBtn,
-  background: COLORS.gold,
-  color: "#1B1608",
-  borderColor: COLORS.gold,
-};
+const diffBtnActive = { ...diffBtn, background: COLORS.gold, color: "#1B1608", borderColor: COLORS.gold, boxShadow: "0 2px 8px rgba(232,172,61,0.3)" };
 
 const searchInput = {
   width: "100%",
@@ -1060,11 +1208,20 @@ const searchInput = {
   background: COLORS.panelAlt,
   border: `1px solid ${COLORS.line}`,
   color: COLORS.text,
-  borderRadius: 8,
-  padding: "9px 12px",
-  fontSize: 13.5,
-  marginBottom: 12,
+  borderRadius: 6,
+  padding: "8px 10px",
+  fontSize: 12.5,
+  marginBottom: 10,
   outline: "none",
+};
+
+const spinner = {
+  width: 14,
+  height: 14,
+  borderRadius: "50%",
+  border: `2px solid ${COLORS.line}`,
+  borderTopColor: COLORS.gold,
+  animation: "cta-spin 0.7s linear infinite",
 };
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
