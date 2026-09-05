@@ -1,36 +1,4 @@
-<!doctype html>
-<html lang="es">
-<head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-<title>Cast Link</title>
-<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-<style>
-  html, body {
-    margin: 0;
-    padding: 0;
-    background: #111017;
-    width: 100%;
-    height: 100%;
-    overflow-x: hidden;
-  }
-  #root {
-    width: 100%;
-    max-width: 375px;
-    margin: 0 auto;
-    min-height: 100vh;
-    background: #111017;
-    box-shadow: 0 0 20px rgba(0,0,0,0.8);
-    position: relative;
-  }
-</style>
-</head>
-<body>
-<div id="root"></div>
-<script type="text/babel">
-const { useState, useEffect, useRef, useCallback } = React;
+import { useState, useEffect, useRef, useCallback } from "react";
 
 // ============================================================
 // DATA LAYER
@@ -388,13 +356,15 @@ function computeScore(seconds, rewinds, difficulty) {
 const GLOBAL_CSS = `
 @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&display=swap');
 
-* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+* { box-sizing: border-box; }
 
-.cta-btn { transition: transform .15s ease, filter .15s ease, box-shadow .15s ease; touch-action: manipulation; }
-.cta-btn:active { transform: scale(0.97); filter: brightness(0.9); }
+.cta-btn { transition: transform .15s ease, filter .15s ease, box-shadow .15s ease; }
+.cta-btn:hover { filter: brightness(1.1); transform: translateY(-1px); }
+.cta-btn:active { transform: translateY(0); filter: brightness(0.95); }
 
-.cta-card { transition: transform .15s ease; touch-action: manipulation; }
-.cta-card:active { transform: scale(0.95); }
+.cta-card { transition: transform .2s ease; }
+.cta-card:hover { transform: translateY(-5px) scale(1.015); }
+.cta-card:hover .cta-card-frame { box-shadow: 0 10px 26px rgba(232,172,61,0.3), 0 0 0 1px #E8AC3D; }
 
 .cta-chip-enter { animation: ctaChipIn .3s cubic-bezier(.2,.8,.3,1); }
 @keyframes ctaChipIn { from { opacity: 0; transform: translateX(-10px) scale(0.9); } to { opacity: 1; transform: none; } }
@@ -408,19 +378,28 @@ const GLOBAL_CSS = `
 .cta-fade-in { animation: ctaFadeIn .35s ease; }
 @keyframes ctaFadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 
-.cta-title-glow { text-shadow: 0 0 16px rgba(232,172,61,0.4); }
+.cta-title-glow { text-shadow: 0 0 24px rgba(232,172,61,0.4), 0 0 60px rgba(232,172,61,0.12); }
 
 .cta-ambient::before {
   content: "";
-  position: absolute;
+  position: fixed;
   inset: 0;
   pointer-events: none;
   z-index: 0;
   background:
     radial-gradient(ellipse 60% 40% at 12% -5%, rgba(232,172,61,0.13), transparent 55%),
-    radial-gradient(ellipse 60% 40% at 100% 105%, rgba(79,195,176,0.10), transparent 55%);
+    radial-gradient(ellipse 60% 40% at 100% 105%, rgba(79,195,176,0.10), transparent 55%),
+    radial-gradient(ellipse 80% 60% at 50% 50%, transparent 60%, rgba(0,0,0,0.35) 100%);
 }
-
+.cta-ambient::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.035;
+  background: repeating-linear-gradient(0deg, #fff 0px, #fff 1px, transparent 1px, transparent 3px);
+}
 .cta-content { position: relative; z-index: 1; }
 
 .cta-confetti { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
@@ -440,22 +419,17 @@ const GLOBAL_CSS = `
 .cta-ring-track { fill: none; stroke: #332F42; stroke-width: 5; }
 .cta-ring-progress { fill: none; stroke: #E8AC3D; stroke-width: 5; stroke-linecap: round; transition: stroke-dashoffset .68s linear; }
 
-.cta-vs { position: relative; text-align: center; margin: 8px 0; }
-.cta-vs::before, .cta-vs::after { content: ""; position: absolute; top: 50%; width: 40%; height: 1px; background: #332F42; }
+.cta-vs { position: relative; text-align: center; margin: 4px 0 18px; }
+.cta-vs::before, .cta-vs::after { content: ""; position: absolute; top: 50%; width: 42%; height: 1px; background: #332F42; }
 .cta-vs::before { left: 0; }
 .cta-vs::after { right: 0; }
 
-.cta-horizontal-scroll {
-  display: flex;
-  gap: 10px;
-  overflow-x: auto;
-  padding-bottom: 8px;
-  scrollbar-width: none;
-  -webkit-overflow-scrolling: touch;
-}
-.cta-horizontal-scroll::-webkit-scrollbar { display: none; }
-
 @keyframes cta-spin { to { transform: rotate(360deg); } }
+
+@media (max-width: 480px) {
+  .cta-header { flex-wrap: wrap; gap: 10px; }
+  .cta-sound-toggle { order: 3; }
+}
 `;
 
 const COLORS = {
@@ -471,7 +445,7 @@ const COLORS = {
   red: "#E2604F",
 };
 
-function ClapperIcon({ size = 26 }) {
+function ClapperIcon({ size = 30 }) {
   return (
     <svg width={size} height={size} viewBox="0 0 48 48" fill="none">
       <rect x="6" y="18" width="36" height="24" rx="3" fill={COLORS.panelAlt} stroke={COLORS.gold} strokeWidth="2" />
@@ -496,7 +470,7 @@ function ConfettiBurst() {
 }
 
 function CountdownRing({ value, max = 3 }) {
-  const size = 110;
+  const size = 130;
   const stroke = 5;
   const r = (size - stroke) / 2;
   const circumference = 2 * Math.PI * r;
@@ -519,9 +493,9 @@ function CountdownRing({ value, max = 3 }) {
 
 function Sprocket() {
   return (
-    <div style={{ display: "flex", justifyContent: "space-evenly", padding: "0 2px", marginBottom: 2 }}>
-      {Array.from({ length: 5 }).map((_, i) => (
-        <div key={i} style={{ width: 3, height: 3, borderRadius: "50%", background: COLORS.line }} />
+    <div style={{ display: "flex", justifyContent: "space-evenly", padding: "0 2px", marginBottom: 3 }}>
+      {Array.from({ length: 6 }).map((_, i) => (
+        <div key={i} style={{ width: 4, height: 4, borderRadius: "50%", background: COLORS.line }} />
       ))}
     </div>
   );
@@ -533,7 +507,7 @@ function PosterCard({ image, mediaType, title, subtitle, onClick }) {
   return (
     <Tag onClick={onClick} className={onClick ? "cta-card" : undefined} style={onClick ? cardBtnReset : { textAlign: "left" }}>
       <Sprocket />
-      <div className="cta-card-frame" style={{ position: "relative", borderRadius: 6, overflow: "hidden", border: `1px solid ${COLORS.line}` }}>
+      <div className="cta-card-frame" style={{ position: "relative", borderRadius: 6, overflow: "hidden", border: `1px solid ${COLORS.line}`, transition: "box-shadow .2s ease" }}>
         {image ? (
           <img src={image} alt="" style={{ width: "100%", aspectRatio: "2 / 3", objectFit: "cover", display: "block" }} />
         ) : (
@@ -542,8 +516,8 @@ function PosterCard({ image, mediaType, title, subtitle, onClick }) {
         <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 3, background: accent }} />
         <div style={{ position: "absolute", inset: 0, background: "linear-gradient(180deg, transparent 60%, rgba(0,0,0,0.55) 100%)" }} />
       </div>
-      <div style={{ fontSize: 11, fontWeight: 600, marginTop: 4, lineHeight: 1.2, color: COLORS.text, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{title}</div>
-      {subtitle && <div style={{ fontSize: 9.5, color: COLORS.textMuted, marginTop: 1 }}>{subtitle}</div>}
+      <div style={{ fontSize: 12.5, fontWeight: 600, marginTop: 6, lineHeight: 1.25, color: COLORS.text }}>{title}</div>
+      {subtitle && <div style={{ fontSize: 11, color: COLORS.textMuted, marginTop: 1 }}>{subtitle}</div>}
     </Tag>
   );
 }
@@ -552,7 +526,7 @@ function PersonCard({ image, name, subtitle, onClick }) {
   const Tag = onClick ? "button" : "div";
   return (
     <Tag onClick={onClick} className={onClick ? "cta-card" : undefined} style={onClick ? { ...cardBtnReset, textAlign: "center" } : { textAlign: "center" }}>
-      <div className="cta-card-frame" style={{ borderRadius: "50%", margin: "0 auto", width: "100%" }}>
+      <div className="cta-card-frame" style={{ borderRadius: "50%", transition: "box-shadow .2s ease" }}>
         {image ? (
           <img
             src={image}
@@ -563,8 +537,8 @@ function PersonCard({ image, name, subtitle, onClick }) {
           <div style={{ width: "100%", aspectRatio: "1 / 1", borderRadius: "50%", background: COLORS.panelAlt, border: `2px solid ${COLORS.line}` }} />
         )}
       </div>
-      <div style={{ fontSize: 11, fontWeight: 600, marginTop: 4, lineHeight: 1.2, color: COLORS.text, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{name}</div>
-      {subtitle && <div style={{ fontSize: 9.5, color: COLORS.textMuted, marginTop: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{subtitle}</div>}
+      <div style={{ fontSize: 12.5, fontWeight: 600, marginTop: 6, lineHeight: 1.25, color: COLORS.text }}>{name}</div>
+      {subtitle && <div style={{ fontSize: 11, color: COLORS.textMuted, marginTop: 1 }}>{subtitle}</div>}
     </Tag>
   );
 }
@@ -572,22 +546,20 @@ function PersonCard({ image, name, subtitle, onClick }) {
 function ReviewBlock({ name, image, credits }) {
   return (
     <div>
-      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
         {image ? (
-          <img src={image} alt="" style={{ width: 34, height: 34, borderRadius: "50%", objectFit: "cover", border: `2px solid ${COLORS.gold}` }} />
+          <img src={image} alt="" style={{ width: 44, height: 44, borderRadius: "50%", objectFit: "cover", border: `2px solid ${COLORS.gold}`, boxShadow: `0 0 16px rgba(232,172,61,0.3)` }} />
         ) : (
-          <div style={{ width: 34, height: 34, borderRadius: "50%", background: COLORS.panelAlt }} />
+          <div style={{ width: 44, height: 44, borderRadius: "50%", background: COLORS.panelAlt }} />
         )}
-        <p style={{ fontSize: 14, fontWeight: 700, margin: 0, color: COLORS.text }}>{name}</p>
+        <p style={{ fontSize: 16, fontWeight: 700, margin: 0, color: COLORS.text }}>{name}</p>
       </div>
       {credits.length === 0 ? (
-        <p style={{ color: COLORS.textMuted, fontSize: 12 }}>No credits found.</p>
+        <p style={{ color: COLORS.textMuted, fontSize: 13 }}>No credits found.</p>
       ) : (
-        <div className="cta-horizontal-scroll">
+        <div style={grid}>
           {credits.map((c) => (
-            <div key={`${c.mediaType}-${c.id}`} style={{ width: 80, flexShrink: 0 }}>
-              <PosterCard image={c.image} mediaType={c.mediaType} title={c.title} subtitle={c.year} />
-            </div>
+            <PosterCard key={`${c.mediaType}-${c.id}`} image={c.image} mediaType={c.mediaType} title={c.title} subtitle={c.year} />
           ))}
         </div>
       )}
@@ -597,18 +569,18 @@ function ReviewBlock({ name, image, credits }) {
 
 function Loading({ text }) {
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "12px 0", justifyContent: "center" }}>
+    <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "8px 0" }}>
       <div style={spinner} />
-      <p style={{ color: COLORS.textMuted, fontSize: 13, margin: 0 }}>{text}</p>
+      <p style={{ color: COLORS.textMuted, fontSize: 14, margin: 0 }}>{text}</p>
     </div>
   );
 }
 
 function Footer() {
   return (
-    <footer style={{ marginTop: 28, paddingTop: 14, borderTop: `1px solid ${COLORS.line}`, textAlign: "center" }}>
-      <p style={{ margin: 0, fontSize: 11, color: COLORS.textMuted, letterSpacing: 0.5 }}>GR Creations 2026</p>
-      <p style={{ margin: "3px 0 0", fontSize: 9.5, color: COLORS.goldDim, lineHeight: 1.3 }}>
+    <footer style={{ marginTop: 40, paddingTop: 18, borderTop: `1px solid ${COLORS.line}`, textAlign: "center" }}>
+      <p style={{ margin: 0, fontSize: 12, color: COLORS.textMuted, letterSpacing: 0.5 }}>GR Creations 2026</p>
+      <p style={{ margin: "4px 0 0", fontSize: 10.5, color: COLORS.goldDim }}>
         TMDB — all credits given. This product uses the TMDB API but is not endorsed or certified by TMDB.
       </p>
     </footer>
@@ -619,7 +591,7 @@ function Footer() {
 // GAME
 // ============================================================
 
-function ConnectTheActors() {
+export default function ConnectTheActors() {
   const [phase, setPhase] = useState("idle");
   const [selectedMode, setSelectedMode] = useState("random");
   const [selectedDifficulty, setSelectedDifficulty] = useState("normal");
@@ -836,31 +808,33 @@ function ConnectTheActors() {
     : options.slice(0, 18);
 
   return (
-    <div className="cta-ambient" style={{ background: COLORS.bg, minHeight: "100vh", color: COLORS.text, fontFamily: "Inter, system-ui, sans-serif" }}>
+    <div className="cta-ambient" style={{ background: COLORS.bg, minHeight: "100%", color: COLORS.text, fontFamily: "Inter, system-ui, sans-serif" }}>
       <style>{GLOBAL_CSS}</style>
-      <div className="cta-content" style={{ width: "100%", padding: "1rem 0.85rem 1rem" }}>
-        <header style={{ marginBottom: 18, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+      <div className="cta-content" style={{ maxWidth: 680, margin: "0 auto", padding: "clamp(1.25rem, 5vw, 2.25rem) clamp(0.9rem, 4vw, 1.25rem) 1.5rem" }}>
+        <header className="cta-header" style={{ marginBottom: 28, display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap" }}>
+          <div style={{ display: "flex", alignItems: "flex-start", gap: 12, minWidth: 0 }}>
             <ClapperIcon />
-            <div>
-              <h1 className="cta-title-glow" style={{ fontFamily: "'Bebas Neue', Inter, sans-serif", fontSize: 28, letterSpacing: 1.5, margin: 0, lineHeight: 1 }}>
+            <div style={{ minWidth: 0 }}>
+              <h1 className="cta-title-glow" style={{ fontFamily: "'Bebas Neue', Inter, sans-serif", fontSize: "clamp(28px, 8vw, 40px)", letterSpacing: 2, margin: 0, lineHeight: 1 }}>
                 CAST LINK
               </h1>
+              <div style={{ width: 56, height: 3, background: COLORS.gold, margin: "10px 0 10px" }} />
+              {phase === "idle" && (
+                <p style={{ color: COLORS.textMuted, fontSize: 13.5, margin: 0, lineHeight: 1.5, maxWidth: 440 }}>
+                  Connect two actors through the movies and shows they share. Faster time, fewer rewinds, higher score.
+                </p>
+              )}
             </div>
           </div>
-          <button onClick={toggleSound} className="cta-btn" style={soundToggleBtn}>
+          <button onClick={toggleSound} className="cta-btn cta-sound-toggle" style={soundToggleBtn}>
             Sound: {soundOn ? "On" : "Off"}
           </button>
         </header>
 
         {phase === "idle" && (
           <div className="cta-fade-in">
-            <p style={{ color: COLORS.textMuted, fontSize: 12.5, margin: "0 0 14px", lineHeight: 1.4 }}>
-              Connect two actors through the movies and shows they share. Faster time, fewer rewinds, higher score.
-            </p>
-
             <p style={sectionLabel}>DIFFICULTY</p>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 16 }}>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 22 }}>
               {DIFFICULTIES.map((d) => (
                 <button
                   key={d.id}
@@ -873,51 +847,51 @@ function ConnectTheActors() {
               ))}
             </div>
 
-            <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 16 }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 18 }}>
               <button onClick={() => startGame("random")} className="cta-btn" style={btnPrimary}>
                 Random game
               </button>
               <button onClick={() => startGame("daily")} className="cta-btn" style={btnSecondary}>
-                Daily challenge{dailyResult ? " — played" : ""}
+                Daily challenge{dailyResult ? " — played today" : ""}
               </button>
             </div>
 
             {dailyResult && (
-              <p style={{ fontSize: 11.5, color: COLORS.textMuted, marginTop: -4, marginBottom: 12 }}>
-                Today's result: {dailyResult.score} pts · {dailyResult.seconds.toFixed(1)}s · {dailyResult.rewinds} rewinds.
+              <p style={{ fontSize: 12.5, color: COLORS.textMuted, marginTop: -6, marginBottom: 14 }}>
+                Today's result: {dailyResult.score} pts · {dailyResult.seconds.toFixed(1)}s · {dailyResult.rewinds} rewinds. Playing again won't overwrite it unless you finish another run.
               </p>
             )}
 
             {personalBest && (
-              <p style={{ fontSize: 11.5, color: COLORS.textMuted, marginBottom: 16 }}>
+              <p style={{ fontSize: 12.5, color: COLORS.textMuted, marginBottom: 18 }}>
                 Personal best: <b style={{ color: COLORS.gold }}>{personalBest.score} pts</b> ({personalBest.seconds.toFixed(1)}s, {personalBest.rewinds} rewinds)
               </p>
             )}
 
             <div style={panel}>
-              <p style={{ ...sectionLabel, marginBottom: 6 }}>HOW TO PLAY</p>
-              <ol style={{ margin: 0, paddingLeft: 16, fontSize: 12, color: COLORS.textMuted, lineHeight: 1.5 }}>
-                <li>Get two actors & study filmographies (15s).</li>
-                <li>Pick a title, then a co-star, until target actor.</li>
-                <li>Rewinds cost points. 10 rewinds = Game Over.</li>
+              <p style={{ ...sectionLabel, marginBottom: 8 }}>HOW TO PLAY</p>
+              <ol style={{ margin: 0, paddingLeft: 18, fontSize: 13, color: COLORS.textMuted, lineHeight: 1.7 }}>
+                <li>You get two actors — study their filmographies for 15s.</li>
+                <li>Pick a movie/show one actor was in, then someone from its cast, and repeat until you reach the other actor.</li>
+                <li>Wrong turn? Rewind — but it costs points, and 10 rewinds ends the run.</li>
               </ol>
             </div>
           </div>
         )}
 
         {phase === "loading-pair" && (
-          <div className="cta-fade-in" style={{ padding: "2rem 0" }}>
+          <div className="cta-fade-in">
             <Loading text="Picking a connectable pair…" />
           </div>
         )}
 
         {phase === "error" && (
           <div className="cta-fade-in" style={panel}>
-            <p style={{ color: COLORS.red, fontWeight: 700, marginBottom: 6, fontSize: 14 }}>Couldn't load TMDb data</p>
-            <p style={{ color: COLORS.textMuted, fontSize: 12, fontFamily: "monospace", background: COLORS.panelAlt, padding: "6px 8px", borderRadius: 6, wordBreak: "break-all" }}>
+            <p style={{ color: COLORS.red, fontWeight: 700, marginBottom: 8 }}>Couldn't load data from TMDb</p>
+            <p style={{ color: COLORS.textMuted, fontSize: 13, fontFamily: "monospace", background: COLORS.panelAlt, padding: "8px 10px", borderRadius: 6 }}>
               {errorMsg}
             </p>
-            <button onClick={() => startGame(selectedMode)} className="cta-btn" style={{ ...btnPrimary, marginTop: 12, padding: "10px 18px" }}>
+            <button onClick={() => startGame(selectedMode)} className="cta-btn" style={{ ...btnPrimary, marginTop: 14 }}>
               Retry
             </button>
           </div>
@@ -925,20 +899,20 @@ function ConnectTheActors() {
 
         {phase === "review" && pair && (
           <div className="cta-fade-in">
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-              <p style={{ fontSize: 12, color: COLORS.textMuted, margin: 0 }}>Study filmographies before starting</p>
-              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <span key={reviewSeconds} className="cta-count-pop" style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 22, color: COLORS.gold, letterSpacing: 1 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 18 }}>
+              <p style={{ fontSize: 13.5, color: COLORS.textMuted, margin: 0 }}>Study their filmographies before you start</p>
+              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <span key={reviewSeconds} className="cta-count-pop" style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 26, color: COLORS.gold, letterSpacing: 1 }}>
                   {reviewSeconds}s
                 </span>
-                <button onClick={beginCountdown} className="cta-btn" style={{ ...btnGhost, padding: "4px 10px", fontSize: 11 }}>
+                <button onClick={beginCountdown} className="cta-btn" style={btnGhost}>
                   Skip
                 </button>
               </div>
             </div>
             <ReviewBlock name={pair.start.name} image={pair.start.image} credits={reviewCredits.start} />
             <div className="cta-vs">
-              <span style={{ position: "relative", background: COLORS.bg, padding: "0 8px", fontFamily: "'Bebas Neue', sans-serif", fontSize: 16, color: COLORS.textMuted, letterSpacing: 1.5 }}>
+              <span style={{ position: "relative", background: COLORS.bg, padding: "0 12px", fontFamily: "'Bebas Neue', sans-serif", fontSize: 20, color: COLORS.textMuted, letterSpacing: 2 }}>
                 VS
               </span>
             </div>
@@ -947,14 +921,14 @@ function ConnectTheActors() {
         )}
 
         {phase === "countdown" && pair && (
-          <div className="cta-fade-in" style={{ textAlign: "center", padding: "2rem 0" }}>
-            <p style={{ fontSize: 13.5, marginBottom: 16, color: COLORS.textMuted }}>
+          <div className="cta-fade-in" style={{ textAlign: "center", padding: "3rem 0" }}>
+            <p style={{ fontSize: 15, marginBottom: 18, color: COLORS.textMuted }}>
               Connect <b style={{ color: COLORS.text }}>{pair.start.name}</b> to <b style={{ color: COLORS.text }}>{pair.target.name}</b>
             </p>
-            <div style={{ position: "relative", width: 110, height: 110, margin: "0 auto" }}>
+            <div style={{ position: "relative", width: 130, height: 130, margin: "0 auto" }}>
               <CountdownRing value={countdown} max={3} />
               <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <span key={countdown} className="cta-count-pop" style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 42, color: COLORS.gold }}>
+                <span key={countdown} className="cta-count-pop" style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 52, color: COLORS.gold }}>
                   {countdown === 0 ? "GO" : countdown}
                 </span>
               </div>
@@ -965,47 +939,46 @@ function ConnectTheActors() {
         {(phase === "playing" || phase === "won" || phase === "lost" || phase === "gaveup") && pair && (
           <div className="cta-fade-in">
             <div style={statBar}>
-              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                 {pair.target.image ? (
-                  <img src={pair.target.image} alt="" style={{ width: 32, height: 32, borderRadius: "50%", objectFit: "cover" }} />
+                  <img src={pair.target.image} alt="" style={{ width: 38, height: 38, borderRadius: "50%", objectFit: "cover" }} />
                 ) : (
-                  <div style={{ width: 32, height: 32, borderRadius: "50%", background: COLORS.panelAlt }} />
+                  <div style={{ width: 38, height: 38, borderRadius: "50%", background: COLORS.panelAlt }} />
                 )}
-                <div style={{ maxWidth: 100, overflow: "hidden" }}>
+                <div>
                   <span style={statLabel}>Target</span>
-                  <div style={{ fontWeight: 700, fontSize: 12, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{pair.target.name}</div>
+                  <div style={{ fontWeight: 700 }}>{pair.target.name}</div>
                 </div>
               </div>
-              <div style={{ textAlign: "center" }}>
+              <div>
                 <span style={statLabel}>Time</span>
-                <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 18, color: COLORS.gold, letterSpacing: 0.5 }}>{elapsed.toFixed(1)}s</div>
+                <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 22, color: COLORS.gold, letterSpacing: 0.5 }}>{elapsed.toFixed(1)}s</div>
               </div>
-              <div style={{ textAlign: "right" }}>
+              <div>
                 <span style={statLabel}>Rewinds</span>
-                <div style={{ fontWeight: 700, fontSize: 12, color: rewindsUsed >= 8 ? COLORS.red : COLORS.text }}>
+                <div style={{ fontWeight: 700, color: rewindsUsed >= 8 ? COLORS.red : COLORS.text }}>
                   {rewindsUsed}/{MAX_REWINDS}
                 </div>
               </div>
             </div>
 
-            <div style={{ display: "flex", overflowX: "auto", alignItems: "center", gap: 4, margin: "12px 0", paddingBottom: 4, scrollbarWidth: "none" }}>
+            <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 6, margin: "16px 0" }}>
               {path.map((p, i) => (
-                <span key={i} className={i === path.length - 1 ? "cta-chip-enter" : undefined} style={{ display: "flex", alignItems: "center", gap: 4, flexShrink: 0 }}>
-                  {i > 0 && <span style={{ color: COLORS.line, fontSize: 11 }}>›</span>}
+                <span key={i} className={i === path.length - 1 ? "cta-chip-enter" : undefined} style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                  {i > 0 && <span style={{ color: COLORS.line }}>›</span>}
                   <span
                     style={{
                       display: "flex",
                       alignItems: "center",
-                      gap: 4,
+                      gap: 6,
                       background: COLORS.panelAlt,
                       border: `1px solid ${COLORS.line}`,
-                      borderRadius: p.type === "actor" ? 999 : 4,
-                      padding: "3px 8px 3px 3px",
-                      fontSize: 11,
-                      whiteSpace: "nowrap",
+                      borderRadius: p.type === "actor" ? 999 : 6,
+                      padding: "4px 10px 4px 4px",
+                      fontSize: 12.5,
                     }}
                   >
-                    {p.image && <img src={p.image} alt="" style={{ width: 16, height: 16, borderRadius: p.type === "actor" ? "50%" : 2, objectFit: "cover" }} />}
+                    {p.image && <img src={p.image} alt="" style={{ width: 20, height: 20, borderRadius: p.type === "actor" ? "50%" : 3, objectFit: "cover" }} />}
                     {p.name}
                   </span>
                 </span>
@@ -1014,11 +987,11 @@ function ConnectTheActors() {
 
             {phase === "playing" && (
               <>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8, gap: 6 }}>
-                  <p style={{ fontSize: 12, color: COLORS.textMuted, margin: 0 }}>
-                    {lastStep.type === "actor" ? "Pick movie/show:" : "Pick cast member:"}
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10, gap: 8, flexWrap: "wrap" }}>
+                  <p style={{ fontSize: 13, color: COLORS.textMuted, margin: 0 }}>
+                    {lastStep.type === "actor" ? "Pick a movie or show:" : "Pick someone from the cast:"}
                   </p>
-                  <div style={{ display: "flex", gap: 6 }}>
+                  <div style={{ display: "flex", gap: 8 }}>
                     <button onClick={rewind} disabled={path.length <= 1} className="cta-btn" style={btnGhost}>
                       Rewind
                     </button>
@@ -1031,14 +1004,14 @@ function ConnectTheActors() {
                 <input
                   value={optionSearch}
                   onChange={(e) => setOptionSearch(e.target.value)}
-                  placeholder={lastStep.type === "actor" ? "Search filmography…" : "Search cast…"}
+                  placeholder={lastStep.type === "actor" ? "Search their filmography…" : "Search the cast…"}
                   style={searchInput}
                 />
 
                 {loadingOptions ? (
                   <Loading text="Loading…" />
                 ) : visibleOptions.length === 0 ? (
-                  <p style={{ color: COLORS.textMuted, fontSize: 12, textAlign: "center", padding: "12px 0" }}>No matches.</p>
+                  <p style={{ color: COLORS.textMuted, fontSize: 13 }}>No matches.</p>
                 ) : (
                   <div style={grid}>
                     {visibleOptions.map((opt) =>
@@ -1063,18 +1036,18 @@ function ConnectTheActors() {
             {phase === "won" && (
               <div style={{ ...panel, textAlign: "center", position: "relative", overflow: "hidden" }}>
                 <ConfettiBurst />
-                <p style={{ fontSize: 16, fontWeight: 700, margin: 0 }}>Connected!</p>
-                <p style={{ color: COLORS.textMuted, fontSize: 12, margin: "4px 0 10px" }}>
+                <p style={{ fontSize: 18, fontWeight: 700, margin: 0 }}>Connected</p>
+                <p style={{ color: COLORS.textMuted, fontSize: 13.5, margin: "6px 0 14px" }}>
                   {elapsed.toFixed(1)}s · {rewindsUsed} rewind{rewindsUsed !== 1 ? "s" : ""} · {path.length - 1} hops
                 </p>
-                <div className="cta-score-pop" style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 38, color: COLORS.gold, letterSpacing: 1, marginBottom: 14 }}>
+                <div className="cta-score-pop" style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 46, color: COLORS.gold, letterSpacing: 1, marginBottom: 18 }}>
                   {finalScore} PTS
                 </div>
-                <div style={{ display: "flex", gap: 8, justifyContent: "center", flexWrap: "wrap" }}>
-                  <button onClick={() => startGame(selectedMode)} className="cta-btn" style={{ ...btnPrimary, padding: "10px 18px", fontSize: 13 }}>
+                <div style={{ display: "flex", gap: 10, justifyContent: "center", flexWrap: "wrap" }}>
+                  <button onClick={() => startGame(selectedMode)} className="cta-btn" style={btnPrimary}>
                     Play again
                   </button>
-                  <button onClick={shareResult} className="cta-btn" style={{ ...btnSecondary, padding: "10px 18px", fontSize: 13 }}>
+                  <button onClick={shareResult} className="cta-btn" style={btnSecondary}>
                     {shareCopied ? "Copied" : "Share result"}
                   </button>
                 </div>
@@ -1083,8 +1056,8 @@ function ConnectTheActors() {
 
             {phase === "lost" && (
               <div style={{ ...panel, textAlign: "center" }}>
-                <p style={{ fontSize: 15, fontWeight: 700, color: COLORS.red, margin: 0 }}>Too many rewinds — game over</p>
-                <button onClick={() => startGame(selectedMode)} className="cta-btn" style={{ ...btnPrimary, marginTop: 12, padding: "10px 18px", fontSize: 13 }}>
+                <p style={{ fontSize: 17, fontWeight: 700, color: COLORS.red, margin: 0 }}>Too many rewinds — game over</p>
+                <button onClick={() => startGame(selectedMode)} className="cta-btn" style={{ ...btnPrimary, marginTop: 16 }}>
                   Try again
                 </button>
               </div>
@@ -1092,8 +1065,8 @@ function ConnectTheActors() {
 
             {phase === "gaveup" && (
               <div style={{ ...panel, textAlign: "center" }}>
-                <p style={{ fontSize: 15, fontWeight: 700, color: COLORS.textMuted, margin: 0 }}>You gave up — no score</p>
-                <button onClick={() => startGame(selectedMode)} className="cta-btn" style={{ ...btnPrimary, marginTop: 12, padding: "10px 18px", fontSize: 13 }}>
+                <p style={{ fontSize: 17, fontWeight: 700, color: COLORS.textMuted, margin: 0 }}>You gave up — no score this round</p>
+                <button onClick={() => startGame(selectedMode)} className="cta-btn" style={{ ...btnPrimary, marginTop: 16 }}>
                   Try again
                 </button>
               </div>
@@ -1113,8 +1086,8 @@ function ConnectTheActors() {
 
 const grid = {
   display: "grid",
-  gridTemplateColumns: "repeat(3, 1fr)",
-  gap: 8,
+  gridTemplateColumns: "repeat(auto-fill, minmax(92px, 1fr))",
+  gap: 12,
 };
 
 const cardBtnReset = {
@@ -1130,35 +1103,36 @@ const cardBtnReset = {
 const panel = {
   background: `linear-gradient(180deg, ${COLORS.panel}, ${COLORS.panelAlt})`,
   border: `1px solid ${COLORS.line}`,
-  borderRadius: 10,
-  padding: "16px 14px",
+  borderRadius: 12,
+  padding: "22px 20px",
 };
 
 const statBar = {
   display: "flex",
   justifyContent: "space-between",
   alignItems: "center",
+  flexWrap: "wrap",
+  gap: 10,
   background: `linear-gradient(180deg, ${COLORS.panel}, ${COLORS.panelAlt})`,
   border: `1px solid ${COLORS.line}`,
-  borderRadius: 10,
-  padding: "10px 12px",
+  borderRadius: 12,
+  padding: "13px 18px",
 };
 
-const statLabel = { fontSize: 9.5, color: COLORS.textMuted, letterSpacing: 0.5, display: "block" };
+const statLabel = { fontSize: 10.5, color: COLORS.textMuted, letterSpacing: 0.5 };
 
-const sectionLabel = { fontSize: 11.5, fontWeight: 700, color: COLORS.textMuted, letterSpacing: 0.5, margin: "0 0 6px" };
+const sectionLabel = { fontSize: 12.5, fontWeight: 700, color: COLORS.textMuted, letterSpacing: 0.5, margin: "0 0 8px" };
 
 const btnPrimary = {
   background: `linear-gradient(180deg, #F0BD57, ${COLORS.gold})`,
   color: "#1B1608",
   border: "none",
   borderRadius: 999,
-  padding: "11px 18px",
-  fontSize: 13.5,
+  padding: "13px 22px",
+  fontSize: 14.5,
   fontWeight: 700,
   cursor: "pointer",
   boxShadow: "0 4px 14px rgba(232,172,61,0.25)",
-  width: "100%",
 };
 
 const btnSecondary = {
@@ -1166,11 +1140,10 @@ const btnSecondary = {
   color: COLORS.text,
   border: `1px solid ${COLORS.line}`,
   borderRadius: 999,
-  padding: "11px 18px",
-  fontSize: 13.5,
+  padding: "13px 22px",
+  fontSize: 14.5,
   fontWeight: 600,
   cursor: "pointer",
-  width: "100%",
 };
 
 const btnGhost = {
@@ -1178,29 +1151,27 @@ const btnGhost = {
   border: `1px solid ${COLORS.line}`,
   color: COLORS.textMuted,
   borderRadius: 999,
-  padding: "5px 10px",
-  fontSize: 11.5,
+  padding: "6px 14px",
+  fontSize: 12.5,
   cursor: "pointer",
 };
 
 const btnGhostDanger = { ...btnGhost, color: COLORS.red, borderColor: COLORS.red };
 
-const soundToggleBtn = { ...btnGhost, flexShrink: 0, padding: "4px 8px", fontSize: 11 };
+const soundToggleBtn = { ...btnGhost, flexShrink: 0 };
 
 const diffBtn = {
   background: COLORS.panelAlt,
   border: `1px solid ${COLORS.line}`,
   color: COLORS.textMuted,
-  borderRadius: 6,
-  padding: "6px 10px",
-  fontSize: 11.5,
+  borderRadius: 8,
+  padding: "8px 14px",
+  fontSize: 13,
   fontWeight: 600,
   cursor: "pointer",
-  flex: "1 1 auto",
-  textAlign: "center",
 };
 
-const diffBtnActive = { ...diffBtn, background: COLORS.gold, color: "#1B1608", borderColor: COLORS.gold, boxShadow: "0 2px 8px rgba(232,172,61,0.3)" };
+const diffBtnActive = { ...diffBtn, background: COLORS.gold, color: "#1B1608", borderColor: COLORS.gold, boxShadow: "0 2px 10px rgba(232,172,61,0.3)" };
 
 const searchInput = {
   width: "100%",
@@ -1208,24 +1179,18 @@ const searchInput = {
   background: COLORS.panelAlt,
   border: `1px solid ${COLORS.line}`,
   color: COLORS.text,
-  borderRadius: 6,
-  padding: "8px 10px",
-  fontSize: 12.5,
-  marginBottom: 10,
+  borderRadius: 8,
+  padding: "10px 12px",
+  fontSize: 13.5,
+  marginBottom: 12,
   outline: "none",
 };
 
 const spinner = {
-  width: 14,
-  height: 14,
+  width: 16,
+  height: 16,
   borderRadius: "50%",
   border: `2px solid ${COLORS.line}`,
   borderTopColor: COLORS.gold,
   animation: "cta-spin 0.7s linear infinite",
 };
-
-const root = ReactDOM.createRoot(document.getElementById("root"));
-root.render(<ConnectTheActors />);
-</script>
-</body>
-</html>
